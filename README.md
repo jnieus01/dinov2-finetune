@@ -1,7 +1,3 @@
-Here's a suggested structure and content for your README.md file for your data science project on implementing fine-tuning using the DINOv2 model and creating a production benchmarking pipeline:
-
----
-
 # DINOv2 Fine-Tuning and Production Benchmarking Pipeline
 
 ## Overview
@@ -62,9 +58,4 @@ We welcome contributions from the community. Please submit your pull requests or
 This project is licensed under [License Name]. See the LICENSE file for more details.
 
 ## Contact
-For any queries or further assistance, please contact [Contact Information].
-
----
-
-This template is a general guideline. You can customize the content based on the specifics of your project, such as adding a section on limitations, future work, or including a FAQ section depending on the audience and the complexity of the project.
-
+For any queries or further assistance, please contact Jordan Nieusma (jordan.m.nieusma@vanderbilt.edu)
