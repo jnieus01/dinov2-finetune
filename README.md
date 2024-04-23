@@ -64,7 +64,9 @@ python production_benchmarking.py --model_path './models/model_final.pth'
 ```
 
 ## References
-8. Making Transformers Efficient in Production. (n.d.). Retrieved April 22, 2024, from https://learning.oreilly.com/library/view/natural-language-processing/9781098136789/ch08.html
+- Oquab, M., Darcet, T., Moutakanni, T., Vo, H., Szafraniec, M., Khalidov, V., Fernandez, P., Haziza, D., Massa, F., El-Nouby, A., Assran, M., Ballas, N., Galuba, W., Howes, R., Huang, P.-Y., Li, S.-W., Misra, I., Rabbat, M., Sharma, V., … Bojanowski, P. (2024). DINOv2: Learning Robust Visual Features without Supervision (arXiv:2304.07193). arXiv. http://arxiv.org/abs/2304.07193
+
+- 8. Making Transformers Efficient in Production. (n.d.). Retrieved April 22, 2024, from https://learning.oreilly.com/library/view/natural-language-processing/9781098136789/ch08.html
 
 
 ## Contact
