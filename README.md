@@ -14,7 +14,7 @@ The DINOv2 model, based on the Vision Transformer (ViT) architecture, is enhance
 
 ## DINOv2 Architecture
 
-[!image](dinov2-arch.png)
+[!image](https://github.com/jnieus01/dinov2-finetune/blob/main/dinov2-arch.png)
 
 ### DINOv2 Layers with Linear Classification Head
 
