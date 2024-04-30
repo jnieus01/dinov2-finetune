@@ -18,39 +18,39 @@ The DINOv2 model, based on the Vision Transformer (ViT) architecture, is enhance
 
 ### DINOv2 Layers with Linear Classification Head
 
-\_LinearClassifierWrapper(
-(backbone): DinoVisionTransformer(
-(patch_embed): PatchEmbed(
-(proj): Conv2d(3, 1024, kernel_size=(14, 14), stride=(14, 14))
-(norm): Identity()
-)
-(blocks): ModuleList(
-(0-23): 24 x NestedTensorBlock(
-(norm1): LayerNorm((1024,), eps=1e-06, elementwise_affine=True)
-(attn): MemEffAttention(
-(qkv): Linear(in_features=1024, out_features=3072, bias=True)
-(attn_drop): Dropout(p=0.0, inplace=False)
-(proj): Linear(in_features=1024, out_features=1024, bias=True)
-(proj_drop): Dropout(p=0.0, inplace=False)
-)
-(ls1): LayerScale()
-(drop_path1): Identity()
-(norm2): LayerNorm((1024,), eps=1e-06, elementwise_affine=True)
-(mlp): Mlp(
-(fc1): Linear(in_features=1024, out_features=4096, bias=True)
-(act): GELU(approximate='none')
-(fc2): Linear(in_features=4096, out_features=1024, bias=True)
-(drop): Dropout(p=0.0, inplace=False)
-)
-(ls2): LayerScale()
-(drop_path2): Identity()
-)
-)
-(norm): LayerNorm((1024,), eps=1e-06, elementwise_affine=True)
-(head): Identity()
-)
-(linear_head): Linear(in_features=5120, out_features=1000, bias=True)
-)
+\_LinearClassifierWrapper(  
+(backbone): DinoVisionTransformer(  
+(patch_embed): PatchEmbed(  
+(proj): Conv2d(3, 1024, kernel_size=(14, 14), stride=(14, 14))  
+(norm): Identity()  
+)  
+(blocks): ModuleList(  
+(0-23): 24 x NestedTensorBlock(  
+(norm1): LayerNorm((1024,), eps=1e-06, elementwise_affine=True)  
+(attn): MemEffAttention(  
+(qkv): Linear(in_features=1024, out_features=3072, bias=True)  
+(attn_drop): Dropout(p=0.0, inplace=False)  
+(proj): Linear(in_features=1024, out_features=1024, bias=True)  
+(proj_drop): Dropout(p=0.0, inplace=False)  
+)  
+(ls1): LayerScale()  
+(drop_path1): Identity()  
+(norm2): LayerNorm((1024,), eps=1e-06, elementwise_affine=True)  
+(mlp): Mlp(  
+(fc1): Linear(in_features=1024, out_features=4096, bias=True)  
+(act): GELU(approximate='none')  
+(fc2): Linear(in_features=4096, out_features=1024, bias=True)  
+(drop): Dropout(p=0.0, inplace=False)  
+)  
+(ls2): LayerScale()  
+(drop_path2): Identity()  
+)  
+)  
+(norm): LayerNorm((1024,), eps=1e-06, elementwise_affine=True)  
+(head): Identity()  
+)  
+(linear_head): Linear(in_features=5120, out_features=1000, bias=True)  
+)  
 
 ## LoRA
 
@@ -64,61 +64,61 @@ The DINOv2 model, based on the Vision Transformer (ViT) architecture, is enhance
 
 ### DINOv2 + LoRA Architecture
 
-PeftModel(
-(base_model): LoraModel(
-(model): \_LinearClassifierWrapper(
-(backbone): DinoVisionTransformer(
-(patch_embed): PatchEmbed(
-(proj): Conv2d(3, 1024, kernel_size=(14, 14), stride=(14, 14))
-(norm): Identity()
-)
-(blocks): ModuleList(
-(0-23): 24 x NestedTensorBlock(
-(norm1): LayerNorm((1024,), eps=1e-06, elementwise_affine=True)
-(attn): MemEffAttention(
-(qkv): lora.Linear(
-(base_layer): Linear(in_features=1024, out_features=3072, bias=True)
-(lora_dropout): ModuleDict(
-(default): Dropout(p=0.1, inplace=False)
-)
-(lora_A): ModuleDict(
-(default): Linear(in_features=1024, out_features=4, bias=False)
-)
-(lora_B): ModuleDict(
-(default): Linear(in_features=4, out_features=3072, bias=False)
-)
-(lora_embedding_A): ParameterDict()
-(lora_embedding_B): ParameterDict()
-)
-(attn_drop): Dropout(p=0.0, inplace=False)
-(proj): Linear(in_features=1024, out_features=1024, bias=True)
-(proj_drop): Dropout(p=0.0, inplace=False)
-)
-(ls1): LayerScale()
-(drop_path1): Identity()
-(norm2): LayerNorm((1024,), eps=1e-06, elementwise_affine=True)
-(mlp): Mlp(
-(fc1): Linear(in_features=1024, out_features=4096, bias=True)
-(act): GELU(approximate='none')
-(fc2): Linear(in_features=4096, out_features=1024, bias=True)
-(drop): Dropout(p=0.0, inplace=False)
-)
-(ls2): LayerScale()
-(drop_path2): Identity()
-)
-)
-(norm): LayerNorm((1024,), eps=1e-06, elementwise_affine=True)
-(head): Identity()
-)
-(linear_head): ModulesToSaveWrapper(
-(original_module): Linear(in_features=1024, out_features=2, bias=True)
-(modules_to_save): ModuleDict(
-(default): Linear(in_features=1024, out_features=2, bias=True)
-)
-)
-)
-)
-)
+PeftModel(  
+(base_model): LoraModel(  
+(model): \_LinearClassifierWrapper(  
+(backbone): DinoVisionTransformer(  
+(patch_embed): PatchEmbed(  
+(proj): Conv2d(3, 1024, kernel_size=(14, 14), stride=(14, 14))  
+(norm): Identity()  
+)  
+(blocks): ModuleList(  
+(0-23): 24 x NestedTensorBlock(  
+(norm1): LayerNorm((1024,), eps=1e-06, elementwise_affine=True)  
+(attn): MemEffAttention(  
+(qkv): lora.Linear(  
+(base_layer): Linear(in_features=1024, out_features=3072, bias=True)  
+(lora_dropout): ModuleDict(  
+(default): Dropout(p=0.1, inplace=False)  
+)  
+(lora_A): ModuleDict(  
+(default): Linear(in_features=1024, out_features=4, bias=False)  
+)  
+(lora_B): ModuleDict(  
+(default): Linear(in_features=4, out_features=3072, bias=False)  
+)  
+(lora_embedding_A): ParameterDict()  
+(lora_embedding_B): ParameterDict()  
+)  
+(attn_drop): Dropout(p=0.0, inplace=False)  
+(proj): Linear(in_features=1024, out_features=1024, bias=True)  
+(proj_drop): Dropout(p=0.0, inplace=False)  
+)  
+(ls1): LayerScale()  
+(drop_path1): Identity()  
+(norm2): LayerNorm((1024,), eps=1e-06, elementwise_affine=True)  
+(mlp): Mlp(  
+(fc1): Linear(in_features=1024, out_features=4096, bias=True)  
+(act): GELU(approximate='none')  
+(fc2): Linear(in_features=4096, out_features=1024, bias=True)  
+(drop): Dropout(p=0.0, inplace=False)  
+)  
+(ls2): LayerScale()  
+(drop_path2): Identity()  
+)  
+)  
+(norm): LayerNorm((1024,), eps=1e-06, elementwise_affine=True)  
+(head): Identity()  
+)  
+(linear_head): ModulesToSaveWrapper(  
+(original_module): Linear(in_features=1024, out_features=2, bias=True)  
+(modules_to_save): ModuleDict(  
+(default): Linear(in_features=1024, out_features=2, bias=True)  
+)  
+)  
+)  
+)  
+)  
 
 ## Critical Analysis
 
