@@ -1,73 +1,152 @@
 # DINOv2 Fine-Tuning and Production Benchmarking Pipeline
 
 ## Overview
-This project is dedicated to implementing fine-tuning for the DINOv2 model and setting up a production benchmarking pipeline. The aim is to enhance the model's performance on specialized tasks by fine-tuning and to ensure robust, scalable deployment through comprehensive benchmarking.
 
-**Model performance** - How accurately and effectively a machine learning model makes predictions or decisions based on new, unseen data. It is typically assessed using various statistical measures that depend on the specific type of model and the task it is designed to perform. Common metrics include:  
-
-  - Accuracy: The proportion of correct predictions among the total number of cases processed.  
-  - Precision: The proportion of true positive predictions in all positive predictions made, used often in cases where the cost of a false positive is high.  
-  - Recall (Sensitivity): The proportion of actual positives that were correctly identified, crucial in scenarios where missing a positive case has severe implications.  
-  - F1 Score: The harmonic mean of precision and recall, providing a balance between the two in environments where both are important.  
-  - AUC-ROC: The area under the receiver operating characteristic curve, a comprehensive measure used to evaluate the performance of binary classification models.  
-
-**Latency** - The time it takes for a model to make a prediction after receiving input. Low latency is important for many applications in order to ensure that the system reacts quickly enough to be practical and effective. Latency is influenced by factors like:
-
-  - Model complexity  
-  - Hardware capabilities  
-  - Optimization of the model inference process  
-  - Efficiency of the data processing pipeline  
-
-**Memory efficiency** - The amount of memory a model requires to perform its tasks. This is particularly important for deploying models on devices with limited memory resources. Memory efficiency can be critical for:
-
-  - Model Size: The disk space or RAM that the model consumes when loaded for inference.  
-  - Memory Bandwidth: The rate at which data is read from or written to memory during model execution.  
-  - Scalability: How well a model can be scaled across multiple devices or nodes without exponentially increasing memory requirements.  
-
-Improving memory efficiency involves techniques like model compression, quantization, and pruning, which help reduce the model's size without significantly sacrificing performance.
+This project is dedicated to implementing fine-tuning for the DINOv2 model to adapt the model to satellite imagery. The aim is to enhance the model's performance on performing binary classification for satellite imagery, and set up the model for further domain-related adaptation.
 
 ## Model Details
+
 The DINOv2 model, based on the Vision Transformer (ViT) architecture, is enhanced in this project to better adapt to specific domains or tasks through fine-tuning on targeted datasets.
 
-## Benchmarking Strategy
-This benchmarking pipeline evaluates the model on multiple fronts: performance metrics (accuracy, precision, recall), latency, and throughput under various system loads.
+## Q1: Do you expect to see good results from fine-tuning just the linear classification head on satellite imagery?
 
-# Implementing the project
+> Due to the drastic differences in the imagery from the model's training data, we can expect that the results initially may not be very accurate, and that additional adaptations may be necessary. And, given that only the head is being trained, there's less risk of overfitting compared to training the entire network--but that may also lead to slower performance gains.
+
+## DINOv2 Architecture
+
+[!image](dinov2-arch.png)
+
+### DINOv2 Layers with Linear Classification Head
+
+\_LinearClassifierWrapper(
+(backbone): DinoVisionTransformer(
+(patch_embed): PatchEmbed(
+(proj): Conv2d(3, 1024, kernel_size=(14, 14), stride=(14, 14))
+(norm): Identity()
+)
+(blocks): ModuleList(
+(0-23): 24 x NestedTensorBlock(
+(norm1): LayerNorm((1024,), eps=1e-06, elementwise_affine=True)
+(attn): MemEffAttention(
+(qkv): Linear(in_features=1024, out_features=3072, bias=True)
+(attn_drop): Dropout(p=0.0, inplace=False)
+(proj): Linear(in_features=1024, out_features=1024, bias=True)
+(proj_drop): Dropout(p=0.0, inplace=False)
+)
+(ls1): LayerScale()
+(drop_path1): Identity()
+(norm2): LayerNorm((1024,), eps=1e-06, elementwise_affine=True)
+(mlp): Mlp(
+(fc1): Linear(in_features=1024, out_features=4096, bias=True)
+(act): GELU(approximate='none')
+(fc2): Linear(in_features=4096, out_features=1024, bias=True)
+(drop): Dropout(p=0.0, inplace=False)
+)
+(ls2): LayerScale()
+(drop_path2): Identity()
+)
+)
+(norm): LayerNorm((1024,), eps=1e-06, elementwise_affine=True)
+(head): Identity()
+)
+(linear_head): Linear(in_features=5120, out_features=1000, bias=True)
+)
+
+## LoRA
+
+### LoRA Weight Matrices
+
+![image](https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/peft/lora_diagram.png)
+
+### Q2: Do you expect LoRA parameter-efficient fine-tuning to improve performance? Why/why not?
+
+> Vision Transformers generally need even more data than CNNs because the ViT needs to learn by itself 2D positional information and other image properties that are inherent in the structure of a CNN. Because the training dataset is small, we might not expect an improvement in results, generally. LoRA modifies the attention and feed-forward layers of transformer models by adding low-rank matrices to the weight matrices in these layers. These matrices are smaller in size and specifically designed to capture the most significant updates needed for adaptation to new tasks or domains. LoRA's targeted approach to modifying model parameters allows the model to learn new features or adjust its existing features without the risk of catastrophic forgetting or overfitting that might occur with full model retraining.
+
+### DINOv2 + LoRA Architecture
+
+PeftModel(
+(base_model): LoraModel(
+(model): \_LinearClassifierWrapper(
+(backbone): DinoVisionTransformer(
+(patch_embed): PatchEmbed(
+(proj): Conv2d(3, 1024, kernel_size=(14, 14), stride=(14, 14))
+(norm): Identity()
+)
+(blocks): ModuleList(
+(0-23): 24 x NestedTensorBlock(
+(norm1): LayerNorm((1024,), eps=1e-06, elementwise_affine=True)
+(attn): MemEffAttention(
+(qkv): lora.Linear(
+(base_layer): Linear(in_features=1024, out_features=3072, bias=True)
+(lora_dropout): ModuleDict(
+(default): Dropout(p=0.1, inplace=False)
+)
+(lora_A): ModuleDict(
+(default): Linear(in_features=1024, out_features=4, bias=False)
+)
+(lora_B): ModuleDict(
+(default): Linear(in_features=4, out_features=3072, bias=False)
+)
+(lora_embedding_A): ParameterDict()
+(lora_embedding_B): ParameterDict()
+)
+(attn_drop): Dropout(p=0.0, inplace=False)
+(proj): Linear(in_features=1024, out_features=1024, bias=True)
+(proj_drop): Dropout(p=0.0, inplace=False)
+)
+(ls1): LayerScale()
+(drop_path1): Identity()
+(norm2): LayerNorm((1024,), eps=1e-06, elementwise_affine=True)
+(mlp): Mlp(
+(fc1): Linear(in_features=1024, out_features=4096, bias=True)
+(act): GELU(approximate='none')
+(fc2): Linear(in_features=4096, out_features=1024, bias=True)
+(drop): Dropout(p=0.0, inplace=False)
+)
+(ls2): LayerScale()
+(drop_path2): Identity()
+)
+)
+(norm): LayerNorm((1024,), eps=1e-06, elementwise_affine=True)
+(head): Identity()
+)
+(linear_head): ModulesToSaveWrapper(
+(original_module): Linear(in_features=1024, out_features=2, bias=True)
+(modules_to_save): ModuleDict(
+(default): Linear(in_features=1024, out_features=2, bias=True)
+)
+)
+)
+)
+)
+
+## Critical Analysis
+
+The results here suggest that LoRA has great potential for obtaining high-accuracy in the domain of satellite imagery using classification tasks. LoRA is directly aimed at fine-tuning pre-trained models by adapting their parameters in a low-rank format. However, LoRA actually increases the model size, which can pose a problem in the future for training on a more robust remote sensor dataset and including additional channels to the input. DoRA is a technique proposed soon after LoRA concerned with optimizing neural network quantization. Further tests should be conducted to evaluate the efficiency and efficacy of LoRA on larger, more complex satellite imagery data and comparisons can and should be made with DoRA to evaluate whether eiether can be realistically used on a "full" dataset.
 
 ## Project Structure
-```
-├── finetune.py                   # Script for fine-tuning DINOv2 on new datasets
-├── load_data.py                  # Data loading utilities
-├── model.py                      # DINOv2 model definition and initial setup
-├── production_benchmarking.py    # Benchmarking model performance in production
-└── sarl_env_xformers.yml         # Project environment config
-```
 
-## Using the Pipeline
-
-### Data Preparation
-Use `load_data.py` to prepare the data for fine-tuning:
-```bash
-python load_data.py --data_path './data/'
 ```
-
-### Fine-Tuning
-To start fine-tuning the DINOv2 model with your dataset, run:
-```bash
-python finetune.py --data_path './data/' --output_path './models/'
-```
-
-### Benchmarking
-Evaluate the performance of the fine-tuned model in a production-like environment using:
-```bash
-python production_benchmarking.py --model_path './models/model_final.pth'
+├── setup_finetune.ipynb          # Notebook for fine-tuning DINOv2 on new datasets
+├── finetune_lora.ipynb           # Notebook for fine-tuning DINOv2 with LoRA
+├── training_history/        # Folder containing fine-tuning history
+└── model.onnx.png        # Diagram of DINOv2 architecture
 ```
 
 ## References
+
+- [DINOv2 Research Resources](https://dinov2.metademolab.com/)
+
+- [Building a Vision Transformer from Scratch with PyTorch ](https://www.akshaymakes.com/blogs/vision-transformer)
+
+- [Vision Transformers 1: Low Earth Orbit Satellites](https://myrtle.ai/resources/leo-1-low-earth-orbit-satellites/)
+
+- [Huggingface LoRA Guide](https://huggingface.co/docs/peft/main/en/conceptual_guides/lora)
+
+- Hu, E. J., Shen, Y., Wallis, P., Allen-Zhu, Z., Li, Y., Wang, S., Wang, L., & Chen, W. (2021). LoRA: Low-Rank Adaptation of Large Language Models (arXiv:2106.09685). arXiv. http://arxiv.org/abs/2106.09685
+
 - Oquab, M., Darcet, T., Moutakanni, T., Vo, H., Szafraniec, M., Khalidov, V., Fernandez, P., Haziza, D., Massa, F., El-Nouby, A., Assran, M., Ballas, N., Galuba, W., Howes, R., Huang, P.-Y., Li, S.-W., Misra, I., Rabbat, M., Sharma, V., … Bojanowski, P. (2024). DINOv2: Learning Robust Visual Features without Supervision (arXiv:2304.07193). arXiv. http://arxiv.org/abs/2304.07193
 
-- 8. Making Transformers Efficient in Production. (n.d.). Retrieved April 22, 2024, from https://learning.oreilly.com/library/view/natural-language-processing/9781098136789/ch08.html
-
-
 ## Contact
+
 For any queries or further assistance, please contact Jordan Nieusma (jordan.m.nieusma@vanderbilt.edu)
