@@ -1,4 +1,4 @@
-# DINOv2 Fine-Tuning and Production Benchmarking Pipeline
+# DINOv2 Fine-Tuning
 
 ## Overview
 
